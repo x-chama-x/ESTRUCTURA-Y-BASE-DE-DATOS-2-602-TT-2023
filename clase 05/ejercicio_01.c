@@ -98,31 +98,41 @@ int MenuPrincipal(void)
 void AgregarProducto(FILE *f)
 {
     producto p; // se crea una variable de struct ya que quiero agregar un producto solo
-    int flag=1; // flag activado por defecto
-    system("cls");
+    int flag=0; 
     do
     {
-        flag=1;
+        system("cls");
         printf("Ingrese el codigo del producto: ");
-        scanf("%d",&p.codigo); 
+        scanf("%d",&p.codigo);
         if (buscarCodigo(f,p.codigo)==0) // se ha ingresado un codigo existente
         {
             system("cls");
             printf("se ha ingresado el mismo codigo\n");
-            printf("pulse una tecla para continuar");
-            getch();
-            system("cls");
-            flag=0;
+            printf("\ningrese 1 para volver al menu principal");
+            printf("\ningrese 2 para volver a ingresar el codigo");
+            printf("\ningrese opcion: ");
+            scanf("%d",&flag);
         }
-    } while (flag==0);
-    printf("Ingrese una breve descripcion del producto: ");
-    fflush(stdin);
-    gets(p.descripcion);
-    printf("ingrese su precio: ");
-    scanf("%f",&p.precio);
-    p.signal=1; // se considera producto "activo"
-    fseek(f,0L,SEEK_END);
-    fwrite(&p, sizeof(producto), 1, f); 
+    } while (flag==2);
+    
+    if (flag==1)
+    {
+        system("cls");
+        printf("pulse una tecla para salir...");
+        getch();
+    }
+    
+    if(flag==0)
+    {
+        printf("Ingrese una breve descripcion del producto: ");
+        fflush(stdin);
+        gets(p.descripcion);
+        printf("ingrese su precio: ");
+        scanf("%f",&p.precio);
+        p.signal=1; // se considera producto "activo"
+        fseek(f,0L,SEEK_END);
+        fwrite(&p, sizeof(producto), 1, f); 
+    }
 }
 
 int buscarCodigo(FILE *f,int codigoIngresado) // reutilizo codigo de la clase 4 ej 6
@@ -165,14 +175,14 @@ void listarProductos(FILE *f)
     case 1:
         rewind(f);
         fread(&p,sizeof(p),1,f);
+        printf("productos activos: \n");
         while (!feof(f))
         {
             if (p.signal==1)
             {
-                printf("productos activos: \n");
                 printf("codigo de producto: %d",p.codigo);
                 printf(", descripcion: %s",p.descripcion);
-                printf(", precio: $%.2f ",p.precio);
+                printf(", precio: $%.2f \n",p.precio);
                 fread(&p,sizeof(p),1,f);
             }
             else
@@ -180,17 +190,17 @@ void listarProductos(FILE *f)
                 fread(&p,sizeof(p),1,f);
             }
         }
-        printf("\n\npulse una tecla para continuar...");
+        printf("\n\npulse una tecla para salir...");
         getch();
         break;
     case 2:
         rewind(f);
         fread(&p,sizeof(p),1,f);
+        printf("productos discontinuados: \n");
         while (!feof(f))
         {
             if (p.signal==0)
             {
-                printf("productos discontinuados: \n");
                 printf("codigo de producto: %d",p.codigo);
                 printf(", descripcion: %s",p.descripcion);
                 printf(", precio: $%.2f ",p.precio);
@@ -201,11 +211,11 @@ void listarProductos(FILE *f)
                 fread(&p,sizeof(p),1,f);
             }
         }
-        printf("\n\npulse una tecla para continuar...");
+        printf("\n\npulse una tecla para salir...");
         getch();
         break;
     case 3:
-        printf("\npulse una tecla para continuar...");
+        printf("\npulse una tecla para salir...");
         getch();
         break;
     }
@@ -240,7 +250,7 @@ void EliminarProducto(FILE *f)
     {
         printf("\nEl producto con codigo %d no existe.\n", codIngr);
     }
-    printf("\npulse una tecla para continuar...");
+    printf("\npulse una tecla para salir...");
     getch();
 }
 
@@ -273,7 +283,7 @@ void EliminarLogicamente(FILE *f)
     {
         printf("\nEl producto con codigo %d no existe.\n", codIngr);
     }
-    printf("\npulse una tecla para continuar...");
+    printf("\npulse una tecla para salir...");
     getch();
 }
 
@@ -310,6 +320,6 @@ void ModificarProducto(FILE *f)
     {
         printf("\nEl producto con codigo %d no existe.\n", codIngr);
     }
-    printf("\npulse una tecla para continuar...");
+    printf("\npulse una tecla para salir...");
     getch();
 }

@@ -30,6 +30,7 @@ void tecla(void);
 void linea(int);
 
 // funciones mias
+int verificarStock(int,int);
 int verificarCodigoCliente(int);
 int verificarCodigoArt(int);
 
@@ -133,70 +134,90 @@ void mostrar(FILE *x,FILE*y)
 	}
 }
 
-void ingresar(FILE* cl, FILE* ar) {
-    regcli c;
+void ingresar(FILE *cl,FILE*ar)
+{
     regarti a;
-    int nFactura, codCliente, codArt, cantArt, i;
+    regcli c;
+    int nFactura,codCliente,codArt,cantArt;
     float cantLitros, total;
 
-    do {
-        printf("\nIngresar numero de factura (0 para finalizar): ");
-        scanf("%d", &nFactura);
-        if (nFactura != 0) {
-            do {
-                printf("Ingresar codigo del cliente (1-5): ");
-                scanf("%d", &codCliente);
-                if (verificarCodigoCliente(codCliente) == -1) {
-                    printf("Codigo de cliente invalido.\n");
-                }
-            } while (verificarCodigoCliente(codCliente) == -1);
+    
+    do
+    {
+        p("\nIngresar numero de factura (0 para finalizar): "); // 1 buscar factura
+        s("%d",&nFactura);
+        if(nFactura!=0)
+        {
+            do
+            {
+                system("cls");
+                printf("Ingresar codigo del cliente (1-5): "); // 2 buscar cliente
+                s("%d", &codCliente);
+            } while (verificarCodigoCliente(codCliente)==1);
 
-            do {
-                printf("Ingresar codigo del articulo (1-6) (0 para volver a ingresar factura): ");
-                scanf("%d", &codArt);
-                if (verificarCodigoArt(codArt) == -1) {
-                    printf("Codigo de articulo invalido.\n");
-                }
-            } while (verificarCodigoArt(codArt) == -1);
+            do
+            {
+                system("cls");
+                p("Ingrese codigo del articulo (1-6) (0 para volver a ingresar factura): ");
+                s("%d",&codArt);
+            } while (verificarCodigoArt(codArt)==1);
+            
 
-            if (codArt != 0) {
-                printf("Ingresar cantidad del articulo: ");
-                scanf("%d", &cantArt);
+            if (verificarCodigoArt(codArt)!=-1)
+            {
+                int flag;
+                do
+                {
+                    system("cls");
+                    p("Ingrese la cantidad del producto: "); // 3 buscar cant para ver stock
+                    s("%d",&cantArt);
 
-                rewind(ar);
-                for (i = 0; i < 6; i++) {
-                    fread(&a, sizeof(a), 1, ar);
-                    if (a.cod_art == codArt) {
-                        if (a.sto_art < cantArt) {
-                            printf("No hay suficiente stock.\n");
-                            return;
-                        } else {
-                            a.sto_art -= cantArt;
-                            a.fact_art += cantArt * a.pre_art;
-                            total = cantArt * a.pre_art;
+                    // verificar Stock
+                    rewind(ar);
+                    while(!feof(ar)) 
+                    {
+                        fread(&a,sizeof(a),1,ar);
+                        if(a.cod_art==codArt)
+                        {
+                            if(a.sto_art>cantArt)
+                            {
+                                flag= 0; // hay stock
+                            }
+                            else
+                            {
+                                p("No hay suficiente stock de %s.\n", a.nom_art);
+                                fclose(ar);
+                                flag = 1; // no hay stock
+                            } 
                         }
-                        fseek(ar, sizeof(a) * i, SEEK_SET);
-                        fwrite(&a, sizeof(a), 1, ar);
-                        break;
                     }
-                }
 
-                rewind(cl);
-                while (fread(&c, sizeof(c), 1, cl)) {
-                    if (c.cod_cli == codCliente) {
-                        c.cuenta += total;
-                        fseek(cl, -sizeof(c), SEEK_CUR);
-                        fwrite(&c, sizeof(c), 1, cl);
-                        break;
-                    }
-                }
+                } while (flag==1);
 
-                printf("Factura ingresada con exito.\n");
+                // 4 buscar cant de litros
+            p("Ingrese la cantidad de litros: ");
+            s("%f", &cantLitros);
+                
             }
-        }
-    } while (nFactura != 0);
-}
 
+            // calcular el total
+            total = a.pre_art * cantArt;
+
+            // Actualizar la facturacion y el stock del articulo en sus respectivos archivos
+             a.fact_art += total;
+             a.sto_art -= cantArt;
+             fseek(ar, -(long)sizeof(a), SEEK_CUR);
+             fwrite(&a, sizeof(a), 1, ar);
+            // Actualizar la cuenta del cliente en el archivo de clientes
+            c.cuenta += total;
+            fseek(cl, -(long)sizeof(c), SEEK_CUR);
+            fwrite(&c, sizeof(c), 1, cl);
+
+        }
+    } while (nFactura!=0);
+    p("\nfacturacion completada!!\n");
+    tecla();
+}
 
 
 int verificarCodigoCliente(int codCliente){

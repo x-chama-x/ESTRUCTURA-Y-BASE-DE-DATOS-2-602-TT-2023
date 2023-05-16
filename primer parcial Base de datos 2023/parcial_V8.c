@@ -147,26 +147,26 @@ void ingresar(FILE* cl, FILE* ar) {
                 } while (codArt < 0 || codArt > 6);
 
                 if (codArt != 0) {
-                    // Validar si el archivo de artículos existe
+                    // Validar si el archivo de artículos existe (validar articulo)
                     int flag2=0;
                     if (ar == NULL) {
                         printf("Error: El archivo de artículos no se ha cargado correctamente.\n");
                         flag2=1;
                     }
-                    // Validar si el artículo existe en el archivo
+                    // Validar si el artículo existe en el archivo (validar archivo)
                     rewind(ar);
                     i = 0;
                     int encontrado = 0;
                     while (!encontrado && fread(&a, sizeof(a), 1, ar)) {
-                    if (a.cod_art == codArt) {
-                        encontrado = 1;
-                    } else {
-                        i++;
-                    }
+                        if (a.cod_art == codArt) {
+                            encontrado = 1;
+                        } else {
+                            i++;
+                        }
                     }
                     if (!encontrado) {
-                    printf("Error: El articulo con el codigo %d no existe.\n", codArt);
-                    flag2=1;
+                        printf("Error: El articulo con el codigo %d no existe.\n", codArt);
+                        flag2=1;
                     }
                     if(flag2==0){
                         printf("Ingresar cantidad del articulo: ");
